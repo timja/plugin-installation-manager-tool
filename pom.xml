@@ -9,8 +9,8 @@
     </parent>
 
     <properties>
-        <revision>2.0.1</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <revision>2.0.0</revision>
+        <changelist></changelist>
         <java.level>8</java.level>
         <!-- Version of Maven Components -->
         <maven.version>3.5.0</maven.version>
