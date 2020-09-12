@@ -1,0 +1,42 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Publish artifact
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build with Maven
+        run: |
+          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "::set-env name=PROJECT_VERSION::$version"
+      - run: echo $PROJECT_VERSION
+      - run: |
+          GROUP_ID=io/jenkins/plugin-management
+          ARTIFACT_ID=plugin-management-cli
+          FILE_NAME=jenkins-plugin-manager
+          echo "::set-env name=FILE_NAME::$FILE_NAME"
+          wget https://repo.jenkins-ci.org/releases/$GROUP_ID/$ARTIFACT_ID/$PROJECT_VERSION/$ARTIFACT_ID-$PROJECT_VERSION.jar \
+            -O $FILE_NAME-$PROJECT_VERSION.jar
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.assets_url }} 
+          asset_path: ./$FILE_NAME-$PROJECT_VERSION.jar
+          asset_name: $FILE_NAME-$PROJECT_VERSION.jar
+          asset_content_type: application/java-archive
